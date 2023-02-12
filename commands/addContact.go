@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func checkIfExists(newContact models.Contact) (bool, error) { //	TODO: TEST!!!
+func CheckIfExists(newContact models.Contact) (bool, error) { //	TODO: TEST!!!
 	exists, err := repository.GetUser(newContact)
 	if err != nil {
 		return true, errors.New("either email or phone are required")
@@ -35,7 +35,7 @@ func AddContact(c *cli.Context) error {
 		return errors.New("either email or phone are required")
 	}
 
-	contactExists, contactExistsError := checkIfExists(newContact)
+	contactExists, contactExistsError := CheckIfExists(newContact)
 	if contactExists {
 		return errors.New("contact already exists")
 	}
