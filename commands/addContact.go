@@ -2,21 +2,21 @@ package commands
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/mwolfhoffman/contact-manager/models"
+	"github.com/mwolfhoffman/contact-manager/repository"
 	"github.com/urfave/cli/v2"
 )
 
-var contacts []models.Contact
-
-func checkIfExists(newContact models.Contact) bool {
-	for i := 0; i < len(contacts); i++ {
-		if contacts[i].Name == newContact.Name && contacts[i].Email == newContact.Email && contacts[i].Phone == newContact.Phone {
-			return true
-		}
+func checkIfExists(newContact models.Contact) (bool, error) { //	TODO: TEST!!!
+	exists, err := repository.GetUser(newContact)
+	if err != nil {
+		return true, errors.New("either email or phone are required")
 	}
-	return false
+	if (exists == models.Contact{}) {
+		return false, nil
+	}
+	return false, nil
 }
 
 func AddContact(c *cli.Context) error {
@@ -28,21 +28,25 @@ func AddContact(c *cli.Context) error {
 	}
 
 	if newContact.Name == "" {
-		return errors.New("name is required.")
+		return errors.New("name is required")
 	}
 
 	if newContact.Email == "" && newContact.Phone == "" {
-		return errors.New("Either email or phone are required.")
+		return errors.New("either email or phone are required")
 	}
 
-	fmt.Println(newContact)
-
-	if checkIfExists(newContact) == true {
-		return errors.New("Contact already exists")
+	contactExists, contactExistsError := checkIfExists(newContact)
+	if contactExists {
+		return errors.New("contact already exists")
+	}
+	if contactExistsError != nil {
+		return contactExistsError
 	}
 
-	list := append(contacts, newContact)
-	print(list)
-	fmt.Println("Contact added to list successfully.")
+	repository.AddContact(&newContact)
 	return nil
+}
+
+func List(c *cli.Context) ([]models.Contact, error) {
+	return repository.List()
 }
