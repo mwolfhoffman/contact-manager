@@ -1,9 +1,7 @@
 package commands
 
 import (
-	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/mwolfhoffman/contact-manager/models"
 	"github.com/mwolfhoffman/contact-manager/repository"
@@ -15,7 +13,9 @@ func checkIfExists(newContact models.Contact) (bool, error) { //	TODO: TEST!!!
 	if err != nil {
 		return true, errors.New("either email or phone are required")
 	}
-	fmt.Println(exists)
+	if (exists == models.Contact{}) {
+		return false, nil
+	}
 	return false, nil
 }
 
@@ -47,6 +47,6 @@ func AddContact(c *cli.Context) error {
 	return nil
 }
 
-func List(c *cli.Context) (*sql.Rows, error) {
+func List(c *cli.Context) ([]models.Contact, error) {
 	return repository.List()
 }
