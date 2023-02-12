@@ -7,8 +7,13 @@ import (
 	"os"
 
 	"github.com/mwolfhoffman/contact-manager/commands"
+	"github.com/mwolfhoffman/contact-manager/db"
 	"github.com/urfave/cli/v2"
 )
+
+func init() {
+	db.ConnectToDb()
+}
 
 func main() {
 	app := &cli.App{
@@ -43,7 +48,8 @@ func main() {
 				Aliases: []string{"l"},
 				Usage:   "list contacts",
 				Action: func(cCtx *cli.Context) error {
-					fmt.Println("completed task: ", cCtx.Args().First())
+					res, err := commands.List(cCtx)
+					fmt.Println(res, err)
 					return nil
 				},
 			},
