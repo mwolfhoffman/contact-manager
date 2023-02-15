@@ -1,4 +1,3 @@
-// https://cli.urfave.org/v2/getting-started/
 package main
 
 import (
@@ -6,16 +5,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/mwolfhoffman/contact-manager/commands"
-	"github.com/mwolfhoffman/contact-manager/db"
+	"github.com/mwolfhoffman/contact-manager/src"
 	"github.com/urfave/cli/v2"
 )
 
-func init() {
-	db.ConnectToDb()
-}
-
 func main() {
+	db := src.ConnectToDb()
+	repo := src.NewRepository(db)
+	service := src.NewService(repo)
 	app := &cli.App{
 		Commands: []*cli.Command{
 			{
@@ -36,7 +33,7 @@ func main() {
 					},
 				},
 				Action: func(cCtx *cli.Context) error {
-					err := commands.AddContact(cCtx)
+					err := service.AddContact(cCtx)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -48,7 +45,7 @@ func main() {
 				Aliases: []string{"l"},
 				Usage:   "list contacts",
 				Action: func(cCtx *cli.Context) error {
-					res, err := commands.List(cCtx)
+					res, err := service.List(cCtx)
 					fmt.Println(res, err)
 					return nil
 				},
@@ -57,24 +54,6 @@ func main() {
 				Name:    "edit",
 				Aliases: []string{"e"},
 				Usage:   "edit contact",
-				// Subcommands: []*cli.Command{
-				// 	{
-				// 		Name:  "add",
-				// 		Usage: "add a new template",
-				// 		Action: func(cCtx *cli.Context) error {
-				// 			fmt.Println("new task template: ", cCtx.Args().First())
-				// 			return nil
-				// 		},
-				// 	},
-				// 	{
-				// 		Name:  "remove",
-				// 		Usage: "remove an existing template",
-				// 		Action: func(cCtx *cli.Context) error {
-				// 			fmt.Println("removed task template: ", cCtx.Args().First())
-				// 			return nil
-				// 		},
-				// 	},
-				// },
 			},
 		},
 	}

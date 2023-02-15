@@ -1,27 +1,35 @@
-package commands
+package src
 
 import (
 	"errors"
 
-	"github.com/mwolfhoffman/contact-manager/models"
-	"github.com/mwolfhoffman/contact-manager/repository"
 	"github.com/urfave/cli/v2"
 )
 
-func CheckIfExists(newContact models.Contact) (bool, error) { //	TODO: TEST!!!
-	exists, err := repository.GetUser(newContact)
+type Service struct {
+	repo *Repository
+}
+
+func NewService(repo *Repository) *Service {
+	return &Service{
+		repo: repo,
+	}
+}
+
+func (cs *Service) CheckIfExists(newContact Contact) (bool, error) {
+	exists, err := cs.repo.GetUser(newContact)
 	if err != nil {
 		return true, errors.New("either email or phone are required")
 	}
-	if (exists == models.Contact{}) {
+	if (exists == Contact{}) {
 		return false, nil
 	}
 	return false, nil
 }
 
-func AddContact(c *cli.Context) error {
+func (cs *Service) AddContact(c *cli.Context) error {
 
-	newContact := models.Contact{
+	newContact := Contact{
 		Name:  c.Value("name").(string),
 		Email: c.Value("email").(string),
 		Phone: c.Value("phone").(string),
@@ -35,7 +43,7 @@ func AddContact(c *cli.Context) error {
 		return errors.New("either email or phone are required")
 	}
 
-	contactExists, contactExistsError := CheckIfExists(newContact)
+	contactExists, contactExistsError := cs.CheckIfExists(newContact)
 	if contactExists {
 		return errors.New("contact already exists")
 	}
@@ -43,10 +51,10 @@ func AddContact(c *cli.Context) error {
 		return contactExistsError
 	}
 
-	repository.AddContact(&newContact)
+	cs.repo.AddContact(&newContact)
 	return nil
 }
 
-func List(c *cli.Context) ([]models.Contact, error) {
-	return repository.List()
+func (cs *Service) List(c *cli.Context) ([]Contact, error) {
+	return cs.repo.List()
 }
