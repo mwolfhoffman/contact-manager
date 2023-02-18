@@ -1,23 +1,29 @@
 package src
 
 import (
+	"context"
 	"errors"
 
 	"github.com/urfave/cli/v2"
 )
 
+type IService interface {
+}
+
 type Service struct {
+	ctx  context.Context
 	repo *Repository
 }
 
-func NewService(repo *Repository) *Service {
+func NewService(ctx context.Context, repo *Repository) *Service {
 	return &Service{
+		ctx:  ctx,
 		repo: repo,
 	}
 }
 
-func (cs *Service) CheckIfExists(newContact Contact) (bool, error) {
-	exists, err := cs.repo.GetUser(newContact)
+func (service *Service) CheckIfExists(newContact Contact) (bool, error) {
+	exists, err := service.repo.GetUser(service.ctx, newContact)
 	if err != nil {
 		return true, errors.New("either email or phone are required")
 	}
@@ -27,7 +33,7 @@ func (cs *Service) CheckIfExists(newContact Contact) (bool, error) {
 	return false, nil
 }
 
-func (cs *Service) AddContact(c *cli.Context) error {
+func (service *Service) AddContact(c *cli.Context) error {
 
 	newContact := Contact{
 		Name:  c.Value("name").(string),
@@ -43,7 +49,7 @@ func (cs *Service) AddContact(c *cli.Context) error {
 		return errors.New("either email or phone are required")
 	}
 
-	contactExists, contactExistsError := cs.CheckIfExists(newContact)
+	contactExists, contactExistsError := service.CheckIfExists(newContact)
 	if contactExists {
 		return errors.New("contact already exists")
 	}
@@ -51,10 +57,10 @@ func (cs *Service) AddContact(c *cli.Context) error {
 		return contactExistsError
 	}
 
-	cs.repo.AddContact(&newContact)
+	service.repo.AddContact(service.ctx, &newContact)
 	return nil
 }
 
-func (cs *Service) List(c *cli.Context) ([]Contact, error) {
-	return cs.repo.List()
+func (service *Service) List(c *cli.Context) ([]Contact, error) {
+	return service.repo.List(service.ctx)
 }

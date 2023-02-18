@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,10 +10,21 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var service *src.Service
+
+func enrichContext(ctx context.Context) context.Context {
+	c := context.WithValue(ctx, "db", src.ConnectToDb())
+	return c
+}
+
+func init() {
+	ctx := context.Background()
+	ctx = enrichContext(ctx)
+	repo := src.NewRepository(ctx)
+	service = src.NewService(ctx, repo)
+}
+
 func main() {
-	db := src.ConnectToDb()
-	repo := src.NewRepository(db)
-	service := src.NewService(repo)
 	app := &cli.App{
 		Commands: []*cli.Command{
 			{
