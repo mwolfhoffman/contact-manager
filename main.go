@@ -91,6 +91,30 @@ func main() {
 				Name:    "edit",
 				Aliases: []string{"e"},
 				Usage:   "edit contact",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "id",
+						Usage: "id of contact",
+					},
+					&cli.StringFlag{
+						Name:  "name",
+						Usage: "name of contact",
+					},
+					&cli.StringFlag{
+						Name:  "email",
+						Usage: "email of contact",
+					}, &cli.StringFlag{
+						Name:  "phone",
+						Usage: "phone number of contact",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					err := service.Edit(cCtx)
+					if err != nil {
+						fmt.Println(err)
+					}
+					return nil
+				},
 			},
 		},
 	}

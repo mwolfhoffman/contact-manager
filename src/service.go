@@ -84,3 +84,11 @@ func (service *Service) Search(c *cli.Context) error {
 	fmt.Println(result)
 	return nil
 }
+
+func (service *Service) Edit(c *cli.Context) error {
+	res, err := service.repo.Update(service.ctx, c)
+	if err == nil {
+		fmt.Printf("Successfully updated %v", res)
+	}
+	return err
+}

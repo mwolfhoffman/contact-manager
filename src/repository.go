@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/urfave/cli/v2"
 	"gorm.io/gorm"
 )
 
@@ -13,6 +14,7 @@ type IRepository interface {
 	List(ctx context.Context) ([]Contact, error)
 	GetUser(ctx context.Context, newContact Contact) (Contact, error)
 	Search(ctx context.Context, name string, email string, phone string) ([]Contact, error)
+	Update(ctx context.Context, c *cli.Context) (Contact, error)
 }
 
 type Repository struct {
@@ -74,5 +76,19 @@ func (repo *Repository) Search(ctx context.Context, name string, email string, p
 
 	err := db.Where(where).Find(&result).Error
 	fmt.Println(err)
+	return result, err
+}
+
+func (repo *Repository) Update(ctx context.Context, c *cli.Context) (Contact, error) {
+	var result Contact
+	id := c.Value("id")
+	contact := Contact{
+		Name:  c.Value("name").(string),
+		Email: c.Value("email").(string),
+		Phone: c.Value("phone").(string),
+	}
+	db, _ := ctx.Value("db").(*gorm.DB)
+	db.Model(Contact{}).Where("id = ?", id).Updates(Contact{Name: contact.Name, Email: contact.Email, Phone: contact.Phone})
+	err := db.Where("id = ?", id).Find(&result).Error
 	return result, err
 }
