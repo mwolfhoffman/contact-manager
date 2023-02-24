@@ -63,6 +63,31 @@ func main() {
 				},
 			},
 			{
+				Name:    "search",
+				Aliases: []string{"s"},
+				Usage:   "search contacts",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "name",
+						Usage: "name of contact",
+					},
+					&cli.StringFlag{
+						Name:  "email",
+						Usage: "email of contact",
+					}, &cli.StringFlag{
+						Name:  "phone",
+						Usage: "phone number of contact",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					err := service.Search(cCtx)
+					if err != nil {
+						fmt.Println(err)
+					}
+					return nil
+				},
+			},
+			{
 				Name:    "edit",
 				Aliases: []string{"e"},
 				Usage:   "edit contact",

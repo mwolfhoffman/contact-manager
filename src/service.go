@@ -3,6 +3,7 @@ package src
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/urfave/cli/v2"
 )
@@ -63,4 +64,23 @@ func (service *Service) AddContact(c *cli.Context) error {
 
 func (service *Service) List(c *cli.Context) ([]Contact, error) {
 	return service.repo.List(service.ctx)
+}
+
+func (service *Service) Search(c *cli.Context) error {
+	searchParams := Contact{
+		Name:  c.Value("name").(string),
+		Email: c.Value("email").(string),
+		Phone: c.Value("phone").(string),
+	}
+
+	if len(searchParams.Name) == 0 && len(searchParams.Email) == 0 && len(searchParams.Phone) == 0 {
+		return errors.New("you must provide at name, email, and or phone")
+	}
+
+	result, err := service.repo.Search(service.ctx, searchParams.Name, searchParams.Email, searchParams.Phone)
+	if err != nil {
+		return errors.New("error occured")
+	}
+	fmt.Println(result)
+	return nil
 }
