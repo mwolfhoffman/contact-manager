@@ -5,10 +5,7 @@ import (
 )
 
 func TestCheckIfExistsReturnsFalseIfUserNotExists(t *testing.T) {
-	db := ConnectToDb()
-	repo := NewRepository(db)
-	service := NewService(repo)
-
+	service := &Service{}
 	newContact := &Contact{Name: "test", Email: "test@test.com"}
 	got, err := service.CheckIfExists(*newContact)
 	want := false

@@ -12,10 +12,10 @@ type IService interface {
 
 type Service struct {
 	ctx  context.Context
-	repo *Repository
+	repo IRepository
 }
 
-func NewService(ctx context.Context, repo *Repository) *Service {
+func NewService(ctx context.Context, repo IRepository) *Service {
 	return &Service{
 		ctx:  ctx,
 		repo: repo,
