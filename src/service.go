@@ -30,7 +30,7 @@ func (service *Service) CheckIfExists(newContact Contact) (bool, error) {
 	if (exists == Contact{}) {
 		return false, nil
 	}
-	return false, nil
+	return true, nil
 }
 
 func (service *Service) AddContact(c *cli.Context) error {
