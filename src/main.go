@@ -7,15 +7,14 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/mwolfhoffman/contact-manager/src"
 	"github.com/urfave/cli/v2"
 )
 
-var service *src.Service
+var service *Service
 
 func enrichContext(ctx context.Context) context.Context {
 	devConnString := os.Getenv("DEV_DB_CONN_STRING")
-	c := context.WithValue(ctx, "db", src.ConnectToDb(devConnString))
+	c := context.WithValue(ctx, "db", ConnectToDb(devConnString))
 	return c
 }
 
@@ -23,8 +22,8 @@ func init() {
 	godotenv.Load(".env")
 	ctx := context.Background()
 	ctx = enrichContext(ctx)
-	repo := src.NewRepository()
-	service = src.NewService(ctx, repo)
+	repo := NewRepository()
+	service = NewService(ctx, repo)
 }
 
 func main() {
@@ -48,7 +47,7 @@ func main() {
 					},
 				},
 				Action: func(cCtx *cli.Context) error {
-					newContact := src.Contact{
+					newContact := Contact{
 						Name:  cCtx.Value("name").(string),
 						Email: cCtx.Value("email").(string),
 						Phone: cCtx.Value("phone").(string),
@@ -131,5 +130,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
-// add, edit, list, remove, find, help

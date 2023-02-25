@@ -1,4 +1,4 @@
-package src
+package main
 
 type Contact struct {
 	ID    uint `gorm:"primaryKey"`
