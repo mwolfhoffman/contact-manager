@@ -1,18 +1,30 @@
-// https://cli.urfave.org/v2/getting-started/
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/mwolfhoffman/contact-manager/commands"
-	"github.com/mwolfhoffman/contact-manager/db"
+	"github.com/joho/godotenv"
+	"github.com/mwolfhoffman/contact-manager/src"
 	"github.com/urfave/cli/v2"
 )
 
+var service *src.Service
+
+func enrichContext(ctx context.Context) context.Context {
+	devConnString := os.Getenv("DEV_DB_CONN_STRING")
+	c := context.WithValue(ctx, "db", src.ConnectToDb(devConnString))
+	return c
+}
+
 func init() {
-	db.ConnectToDb()
+	godotenv.Load(".env")
+	ctx := context.Background()
+	ctx = enrichContext(ctx)
+	repo := src.NewRepository()
+	service = src.NewService(ctx, repo)
 }
 
 func main() {
@@ -36,7 +48,7 @@ func main() {
 					},
 				},
 				Action: func(cCtx *cli.Context) error {
-					err := commands.AddContact(cCtx)
+					err := service.AddContact(cCtx)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -48,8 +60,33 @@ func main() {
 				Aliases: []string{"l"},
 				Usage:   "list contacts",
 				Action: func(cCtx *cli.Context) error {
-					res, err := commands.List(cCtx)
+					res, err := service.List(cCtx)
 					fmt.Println(res, err)
+					return nil
+				},
+			},
+			{
+				Name:    "search",
+				Aliases: []string{"s"},
+				Usage:   "search contacts",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "name",
+						Usage: "name of contact",
+					},
+					&cli.StringFlag{
+						Name:  "email",
+						Usage: "email of contact",
+					}, &cli.StringFlag{
+						Name:  "phone",
+						Usage: "phone number of contact",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					err := service.Search(cCtx)
+					if err != nil {
+						fmt.Println(err)
+					}
 					return nil
 				},
 			},
@@ -57,24 +94,30 @@ func main() {
 				Name:    "edit",
 				Aliases: []string{"e"},
 				Usage:   "edit contact",
-				// Subcommands: []*cli.Command{
-				// 	{
-				// 		Name:  "add",
-				// 		Usage: "add a new template",
-				// 		Action: func(cCtx *cli.Context) error {
-				// 			fmt.Println("new task template: ", cCtx.Args().First())
-				// 			return nil
-				// 		},
-				// 	},
-				// 	{
-				// 		Name:  "remove",
-				// 		Usage: "remove an existing template",
-				// 		Action: func(cCtx *cli.Context) error {
-				// 			fmt.Println("removed task template: ", cCtx.Args().First())
-				// 			return nil
-				// 		},
-				// 	},
-				// },
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "id",
+						Usage: "id of contact",
+					},
+					&cli.StringFlag{
+						Name:  "name",
+						Usage: "name of contact",
+					},
+					&cli.StringFlag{
+						Name:  "email",
+						Usage: "email of contact",
+					}, &cli.StringFlag{
+						Name:  "phone",
+						Usage: "phone number of contact",
+					},
+				},
+				Action: func(cCtx *cli.Context) error {
+					err := service.Edit(cCtx)
+					if err != nil {
+						fmt.Println(err)
+					}
+					return nil
+				},
 			},
 		},
 	}
