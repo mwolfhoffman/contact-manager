@@ -8,10 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func ConnectToDb() *gorm.DB {
+func ConnectToDb(connString string) *gorm.DB {
 	var DB *gorm.DB
 	var err error
-	DB, err = gorm.Open(sqlite.Open("./dev.db"), &gorm.Config{})
+	DB, err = gorm.Open(sqlite.Open(connString), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal("Failed to connect to database")

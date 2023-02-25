@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/mwolfhoffman/contact-manager/src"
 	"github.com/urfave/cli/v2"
 )
@@ -13,14 +14,16 @@ import (
 var service *src.Service
 
 func enrichContext(ctx context.Context) context.Context {
-	c := context.WithValue(ctx, "db", src.ConnectToDb())
+	devConnString := os.Getenv("DEV_DB_CONN_STRING")
+	c := context.WithValue(ctx, "db", src.ConnectToDb(devConnString))
 	return c
 }
 
 func init() {
+	godotenv.Load(".env")
 	ctx := context.Background()
 	ctx = enrichContext(ctx)
-	repo := src.NewRepository(ctx)
+	repo := src.NewRepository()
 	service = src.NewService(ctx, repo)
 }
 

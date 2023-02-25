@@ -3,7 +3,6 @@ package src
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/urfave/cli/v2"
 	"gorm.io/gorm"
@@ -21,7 +20,7 @@ type Repository struct {
 	repo IRepository
 }
 
-func NewRepository(ctx context.Context) *Repository {
+func NewRepository() *Repository {
 	return &Repository{}
 }
 
@@ -46,10 +45,10 @@ func (repo *Repository) GetUser(ctx context.Context, newContact Contact) (Contac
 
 func (repo *Repository) Search(ctx context.Context, name string, email string, phone string) ([]Contact, error) {
 	var result []Contact
-
-	fmt.Println(len(os.Args))
-
-	db, _ := ctx.Value("db").(*gorm.DB)
+	db, ok := ctx.Value("db").(*gorm.DB)
+	if ok == false {
+		fmt.Printf("error getting db from context: %v", db)
+	}
 	var where string
 	var whereParts []string
 
@@ -64,7 +63,6 @@ func (repo *Repository) Search(ctx context.Context, name string, email string, p
 	}
 
 	for i := 0; i < len(whereParts); i++ {
-		fmt.Println(whereParts[i])
 		if i > 0 {
 			where += " AND " + whereParts[i]
 		} else {
@@ -72,10 +70,7 @@ func (repo *Repository) Search(ctx context.Context, name string, email string, p
 		}
 	}
 
-	fmt.Println(where)
-
 	err := db.Where(where).Find(&result).Error
-	fmt.Println(err)
 	return result, err
 }
 
