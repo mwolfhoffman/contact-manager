@@ -48,7 +48,12 @@ func main() {
 					},
 				},
 				Action: func(cCtx *cli.Context) error {
-					err := service.AddContact(cCtx)
+					newContact := src.Contact{
+						Name:  cCtx.Value("name").(string),
+						Email: cCtx.Value("email").(string),
+						Phone: cCtx.Value("phone").(string),
+					}
+					err := service.AddContact(newContact)
 					if err != nil {
 						fmt.Println(err)
 					}

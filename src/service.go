@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/urfave/cli/v2"
 )
-
-type IService interface {
-}
 
 type Service struct {
 	ctx  context.Context
@@ -34,13 +32,7 @@ func (service *Service) CheckIfExists(newContact Contact) (bool, error) {
 	return true, nil
 }
 
-func (service *Service) AddContact(c *cli.Context) error {
-
-	newContact := Contact{
-		Name:  c.Value("name").(string),
-		Email: c.Value("email").(string),
-		Phone: c.Value("phone").(string),
-	}
+func (service *Service) AddContact(newContact Contact) error {
 
 	if newContact.Name == "" {
 		return errors.New("name is required")
@@ -48,6 +40,15 @@ func (service *Service) AddContact(c *cli.Context) error {
 
 	if newContact.Email == "" && newContact.Phone == "" {
 		return errors.New("either email or phone are required")
+	}
+
+	if newContact.Email != "" {
+
+		emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+		isValid := emailRegex.MatchString(newContact.Email)
+		if !isValid {
+			return errors.New("email must be valid")
+		}
 	}
 
 	contactExists, contactExistsError := service.CheckIfExists(newContact)
